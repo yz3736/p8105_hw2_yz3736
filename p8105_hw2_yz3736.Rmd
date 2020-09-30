@@ -12,13 +12,23 @@ library(readxl)
 ```
 
 # Question 1
-Read the Mr. Trash Wheel sheet.
-```{r read_data}
+Read and clean the Mr. Trash Wheel sheet.
+(1) Specify the sheet in the Excel file and to omit non-data entries;
+(2) Use reasonable variable names;
+(3) Omit rows that do not include dumpster-specific data;
+(4) Round the number of sports balls to the nearest integer and converts the result to an integer variable.
+```{r readnclean_data}
 trashwheel_df = 
 	read_xlsx(
 		"./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
 		sheet = "Mr. Trash Wheel",
-		range = cell_cols("A:N")) %>% view
+		range = cell_cols("A:N")) %>% 
+	janitor::clean_names() %>% 
+	drop_na(dumpster) %>% 
+	mutate(
+		sports_balls = round(sports_balls),
+		sports_balls = as.integer(sports_balls)
+	)
 ```
 
 
