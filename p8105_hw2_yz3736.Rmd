@@ -81,7 +81,7 @@ Additional data sheets include month precipitation data, in which:
 
 # Question 2
 ### Part 1: Read and clean NYC Transit data
-(1) Retain line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance
+Retain line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance
 ```{r readnclean_transit}
 transit_df = 
 	read_csv(
@@ -97,4 +97,29 @@ transit_df =
   drop_na(route_name) %>%
   select(line:station_longitude, route_number, route_name, entry, vending, entrance_type, ada)
 ```
-(2) Convert the entry variable from character (YES vs NO) to a logical variable.
+
+### Part 2: Convert the entry variable from character to a logical variable
+```{r logical_entry}
+transit_df = 
+  transit_df %>%
+  mutate(entry = if_else(entry == "YES", TRUE, FALSE))
+```
+
+### Part 3: Write a short paragraph about this dataset
+NYC Transit data contains information related to each entrance and exit for each subway station in NYC. Data also include information on lines, stations and routes. So far, my data cleaning steps include cleaning the variable names, converting route from double to a character variable, converting route from wide to long format and omitting rows that do not include route-specific data, and finally, converting entry from character to a logical variable. There are a total of `r nrow(transit_df)` rows x `r ncol(transit_df)` columns in our final dataset. Data are tidy now.
+
+### Part 4: Answer the following questions
+(1) How many distinct stations are there?\
+There are `r transit_df %>% distinct(line, station_name) %>% nrow()` distinct stations.
+
+(2) How many stations are ADA compliant?\
+There are `r filter(transit_df, ada == TRUE) %>% distinct(line, station_name) %>% nrow()` stations that are ADA compliant.
+
+(3) What proportion of station entrances / exits without vending allow entrance?\
+`r transit_df %>% filter(vending == "NO", entry == TRUE) %>% nrow() / transit_df %>% filter(vending == "NO") %>% nrow()` of station entrances / exits without vending allow entrance.
+
+(4) How many distinct stations serve the A train?\
+`r transit_df %>% distinct(line, station_name,route_name) %>% filter(route_name == "A") %>% nrow()` distinct stations serve the A train.
+
+(5) Of the stations that serve the A train, how many are ADA compliant?\
+Of the stations that serve the A train, `r transit_df %>% distinct(line, station_name, route_name, ada) %>% filter(route_name == "A", ada == TRUE) %>% nrow()` are ADA compliant.
