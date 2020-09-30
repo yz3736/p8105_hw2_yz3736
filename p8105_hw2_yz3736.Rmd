@@ -89,15 +89,7 @@ transit_df =
 	read_csv(
 		"./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>% 
 	janitor::clean_names() %>%
-  mutate_at(vars(route1:route11), as.character) %>%
-  pivot_longer(
-    route1:route11,
-    names_to = "route_number",
-    names_prefix = "route",
-    values_to = "route_name"
-  ) %>%
-  drop_na(route_name) %>%
-  select(line:station_longitude, route_number, route_name, entry, vending, entrance_type, ada)
+  select(line:station_longitude, route1:route11, entry, vending, entrance_type, ada)
 ```
 
 ### Part 2: Convert the entry variable from character to a logical variable
@@ -108,7 +100,7 @@ transit_df =
 ```
 
 ### Part 3: Write a short paragraph about this dataset
-NYC Transit data contains information related to each entrance and exit for each subway station in NYC. Data also include information on lines, stations and routes. So far, my data cleaning steps include cleaning the variable names, converting route from double to a character variable, converting route from wide to long format and omitting rows that do not include route-specific data, and finally, converting entry from character to a logical variable. There are a total of `r nrow(transit_df)` rows x `r ncol(transit_df)` columns in our final dataset. Data are tidy now.
+NYC Transit data contains information related to each entrance and exit for each subway station in NYC. Data also include information on lines, stations and routes. So far, my data cleaning steps include cleaning the variable names, selecting required variables and converting _entry_ from character to a logical variable. There are a total of `r nrow(transit_df)` rows x `r ncol(transit_df)` columns in our final dataset. Data are not tidy yet, because route served is spread across 11 columns.
 
 ### Part 4: Answer the following questions
 (1) How many distinct stations are there?\
@@ -120,11 +112,24 @@ There are `r filter(transit_df, ada == TRUE) %>% distinct(line, station_name) %>
 (3) What proportion of station entrances / exits without vending allow entrance?\
 `r transit_df %>% filter(vending == "NO", entry == TRUE) %>% nrow() / transit_df %>% filter(vending == "NO") %>% nrow()` of station entrances / exits without vending allow entrance.
 
-(4) How many distinct stations serve the A train?\
-`r transit_df %>% distinct(line, station_name,route_name) %>% filter(route_name == "A") %>% nrow()` distinct stations serve the A train.
+### Part 5: Reformat data so that route number and route name are distinct variables
+```{r distinct_route}
+transit_tidy = 
+	transit_df %>%
+  mutate_at(vars(route1:route11), as.character) %>%
+  pivot_longer(
+    route1:route11,
+    names_to = "route_number",
+    names_prefix = "route",
+    values_to = "route_name"
+  ) %>%
+  drop_na(route_name)
+```
+(1) How many distinct stations serve the A train?\
+`r transit_tidy %>% distinct(line, station_name,route_name) %>% filter(route_name == "A") %>% nrow()` distinct stations serve the A train.
 
-(5) Of the stations that serve the A train, how many are ADA compliant?\
-Of the stations that serve the A train, `r transit_df %>% distinct(line, station_name, route_name, ada) %>% filter(route_name == "A", ada == TRUE) %>% nrow()` are ADA compliant.
+(2) Of the stations that serve the A train, how many are ADA compliant?\
+Of the stations that serve the A train, `r transit_tidy %>% distinct(line, station_name, route_name, ada) %>% filter(route_name == "A", ada == TRUE) %>% nrow()` are ADA compliant.
 
 
 # Question 3
@@ -215,5 +220,5 @@ pols_snp_unemp_df =
 ```
 
 ### Part 5: Write a short paragraph about these datasets
-My result dataset was joined by three datasets, which were merged by _year_ and _month_: pols-month, snp, and unemployment. Before merging the datasets, I made sure that the formats and data types of _year_ and _month_ variables were consistent across all three datasets. pols-month dataset contains the number of national politicians who are democratic or republican at given time. The indicators of whether the president was democratic or republican on the associated date were recoded by a new variable called _president_. snp dataset contains variable _close_, which are the closing values of the S&P stock index on the associated date. umemployment dataset contains _unemployment_pct_, which indicates the percentage of unemployment at given time. There are a total of `r nrow(pols_snp_unemp_df)` rows x `r ncol(pols_snp_unemp_df)` columns in our final dataset.The range of _year_ is [`r range(pull(pols_snp_unemp_df, year))`]. 
+My result dataset was joined by three datasets: pols-month, snp, and unemployment. Before merging these datasets by _year_ and _month_, I made sure that the formats and data types of _year_ and _month_ variables were consistent across all three datasets. pols-month dataset contains the number of national politicians who are democratic or republican at given time. The indicators of whether the president was democratic or republican on the associated date were recoded by a new variable called _president_. snp dataset contains _close_ variable, which indicates the closing values of the S&P stock index on the associated date. umemployment dataset contains _unemployment_pct_ variable, which indicates the percentage of unemployment at given time. There are a total of `r nrow(pols_snp_unemp_df)` rows x `r ncol(pols_snp_unemp_df)` columns in our final dataset.The range of _year_ is [`r range(pull(pols_snp_unemp_df, year))`]. 
 
