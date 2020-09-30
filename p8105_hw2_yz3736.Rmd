@@ -1,0 +1,25 @@
+---
+title: "Homework 2"
+author: Yuanxin Zhang
+output: github_document
+---
+
+This is my solution to Homework 2.
+
+```{r setup}
+library(tidyverse)
+library(readxl)
+```
+
+# Question 1
+Read the Mr. Trash Wheel sheet.
+```{r read_data}
+trashwheel_df = 
+	read_xlsx(
+		"./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+		sheet = "Mr. Trash Wheel",
+		range = cell_cols("A:N")) %>% view
+```
+
+
+# Question 2
